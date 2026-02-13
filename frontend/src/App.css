@@ -1,0 +1,297 @@
+/* --- 1. CSS Variables & Global Reset (Updated for White Theme) --- */
+:root {
+  --bg-dark: #F8FAFC;      /* மென்மையான வெள்ளை பின்னணி */
+  --card-dark: #FFFFFF;    /* கார்டுகளுக்கான தூய வெள்ளை */
+  --primary-color: #6366F1; /* ப்ரொபஷனல் இண்டிகோ (Indigo) */
+  --primary-hover: #4F46E5;
+  --accent-teal: #0D9488;   /* டீல் நிறம் (Teal) */
+  --text-light: #1E293B;    /* ஆழமான சாம்பல் (எழுத்துக்களுக்கு) */
+  --text-muted: #64748B;    /* மங்கலான சாம்பல் நிறம் */
+  --danger: #EF4444;
+  --shadow-subtle: 0 10px 30px -15px rgba(0, 0, 0, 0.1); /* மென்மையான நிழல் */
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-family: 'Inter', sans-serif; /* பாடி டெக்ஸ்டுக்கு Inter */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  line-height: 1.6;
+}
+
+/* தலைப்புகளுக்கு Poppins */
+h1, h2, h3, button {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* --- 2. Animations (அனிமேஷன்ஸ் - மாற்றமில்லை) --- */
+/* மெதுவாக மேலே எழும்பி வரும் அனிமேஷன் */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* லோடிங் அனிமேஷன் (துடிப்பு) */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* --- 3. Layout & Container --- */
+.container {
+  width: 95%;
+  max-width: 1200px; 
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  animation: fadeInUp 0.8s ease-out; 
+}
+
+h1 {
+  background: linear-gradient(to right, var(--primary-color), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- 4. Modern Cards --- */
+.card {
+  background: var(--card-dark);
+  padding: 35px;
+  border-radius: var(--radius-lg);
+  border: 1px solid #E2E8F0; /* லேசான பார்டர் */
+  box-shadow: var(--shadow-subtle);
+  width: 100%;
+  box-sizing: border-box;
+  transition: var(--transition-smooth);
+}
+
+/* கார்டின் மீது மவுஸ் வைத்தால் லேசாக மேலே எழும்பும் */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  border-color: rgba(99, 102, 241, 0.2); 
+}
+
+/* Question Card Special Styling */
+.question-card {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: none !important; 
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to right, #FFFFFF, #F9FAFB);
+}
+
+/* கேள்விக் கார்டுக்கு ஒரு வைலட் நிற சாய்வுப் பட்டை (Gradient Bar) */
+.question-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary-color), var(--accent-teal));
+  border-radius: 4px;
+}
+
+/* Controls */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.control-group h3 {
+  font-size: 1.4rem;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-light);
+}
+
+.control-group p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* --- 5. Pro Buttons & Inputs --- */
+button {
+  padding: 16px 32px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* பட்டன் கிளிக் அனிமேஷன் */
+button:active {
+  transform: scale(0.98);
+}
+
+/* Primary Button (Gradient) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), #818cf8);
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: #F1F5F9;
+  color: var(--primary-color);
+  border: 1.5px solid var(--primary-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Next Question Button */
+.btn-next-q {
+    background: #EEF2FF;
+    color: var(--primary-color);
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border-radius: 50px; 
+}
+.btn-next-q:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Danger & Dark Buttons */
+.btn-danger { background: #FEE2E2; color: var(--danger); }
+.btn-dark { 
+    background: #1F293B; 
+    color: white;
+    border: 1px solid #334155;
+}
+.btn-dark:hover {
+    background: #0F172A;
+    border-color: var(--text-light);
+}
+
+/* Disabled State */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  animation: pulse 1.5s infinite; 
+}
+
+/* Medium Button Fix */
+.btn-medium {
+  width: 100%;
+  max-width: 450px;
+  margin: 25px auto;
+  display: block;
+  font-size: 1.1rem;
+  padding: 18px;
+}
+
+/* Inputs styling */
+textarea, select, input[type="file"] {
+  background: #F8FAFC;
+  border: 2px solid #E2E8F0;
+  color: var(--text-light);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  width: 100%;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: var(--transition-smooth);
+  font-family: 'Inter', sans-serif;
+}
+
+/* இன்புட் மீது கிளிக் செய்யும்போது பார்டர் கலர் மாறும் */
+textarea:focus, select:focus {
+  border-color: var(--primary-color);
+  background: #FFFFFF;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+/* File Input Customization */
+input[type="file"]::-webkit-file-upload-button {
+  background: #E2E8F0;
+  color: var(--text-dark);
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+/* Feedback Section */
+.feedback-card {
+    margin-top: 40px;
+    background: #F5F3FF; /* லேசான ஊதா நிறம் */
+    border-left: none !important;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.feedback-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, #8B5CF6, var(--primary-color));
+    border-radius: 4px;
+}
