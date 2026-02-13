@@ -13,8 +13,11 @@ function App() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  // --- New State: கடைசியாக எதை வச்சு கேள்வி கேட்டோம்? ---
-  const [questionSource, setQuestionSource] = useState("topic"); // Default 'topic'
+  // --- State to track question source (Resume vs Topic) ---
+  const [questionSource, setQuestionSource] = useState("topic"); 
+
+  // --- Backend URL ---
+  const API_URL = "https://ai-interviewer-backend-brd5.onrender.com";
 
   // --- Functions ---
   const handleResumeFileChange = (event) => setResumeFile(event.target.files[0]);
@@ -23,26 +26,32 @@ function App() {
   const handleGenerateResumeQuestion = async () => {
     if (!resumeFile) return alert("Please select a resume file first!");
 
-    setQuestionSource("resume"); // State-ஐ Resume என மாற்றுகிறோம்
+    setQuestionSource("resume");
     setLoading(true); setFeedback(""); setAnswer("");
 
     const formData = new FormData();
     formData.append("file", resumeFile);
     try {
-      const response = await axios.post("https://ai-interviewer-backend-brd5.onrender.com/upload_resume", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const response = await axios.post(`${API_URL}/upload_resume`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       setQuestion(response.data.question);
-    } catch (error) { alert("Error generating question."); } finally { setLoading(false); }
+    } catch (error) { 
+      console.error(error);
+      alert("Error generating question from resume."); 
+    } finally { setLoading(false); }
   };
 
   // 2. Topic Question
   const handleGenerateTopicQuestion = async () => {
-    setQuestionSource("topic"); // State-ஐ Topic என மாற்றுகிறோம்
+    setQuestionSource("topic");
     setLoading(true); setFeedback(""); setAnswer("");
 
     try {
-      const response = await axios.post("https://ai-interviewer-backend-brd5.onrender.com/generate_question", { topic: topic });
+      const response = await axios.post(`${API_URL}/generate_question`, { topic: topic });
       setQuestion(response.data.question);
-    } catch (error) { alert("Error getting new question!"); } finally { setLoading(false); }
+    } catch (error) { 
+      console.error(error);
+      alert("Error getting new question!"); 
+    } finally { setLoading(false); }
   };
 
   // 3. Smart Next Button Logic
@@ -58,18 +67,25 @@ function App() {
     if (!answer) return alert("Please type an answer!");
     setLoading(true);
     try {
-      const response = await axios.post("https://ai-interviewer-backend-brd5.onrender.com/analyze_answer", { question: question, user_answer: answer });
+      const response = await axios.post(`${API_URL}/analyze_answer`, { question: question, user_answer: answer });
       setFeedback(response.data.ai_feedback);
-    } catch (error) { alert("Error analyzing!"); } finally { setLoading(false); }
+    } catch (error) { 
+      console.error(error);
+      alert("Error analyzing answer!"); 
+    } finally { setLoading(false); }
   };
 
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Use Chrome!");
+    if (!SpeechRecognition) return alert("Speech Recognition is only supported in Chrome/Edge.");
+    
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (event) => setAnswer(prev => prev + " " + event.results[0][0].transcript);
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setAnswer(prev => prev ? prev + " " + transcript : transcript);
+    };
     recognition.onend = () => setIsListening(false);
     recognition.start();
   };
@@ -77,9 +93,10 @@ function App() {
   const fetchHistory = async () => {
     if (showHistory) { setShowHistory(false); return; }
     try {
-      const response = await axios.get("https://ai-interviewer-backend-brd5.onrender.com/history");
-      setHistory(response.data); setShowHistory(true);
-    } catch (error) { alert("Backend error!"); }
+      const response = await axios.get(`${API_URL}/history`);
+      setHistory(response.data); 
+      setShowHistory(true);
+    } catch (error) { alert("Error fetching history!"); }
   };
 
   return (
@@ -91,7 +108,7 @@ function App() {
 
         {/* Left Card: Resume Section */}
         <div className="card control-group">
-          <h3>📄 Resume Based</h3>
+          <h3 style={{marginTop:0}}>📄 Resume Based</h3>
           <p>Upload your resume (PDF) to get tailored questions.</p>
           <div className="input-row">
             <input type="file" accept=".pdf" onChange={handleResumeFileChange} />
@@ -107,7 +124,7 @@ function App() {
 
         {/* Right Card: Topic Section */}
         <div className="card control-group">
-          <h3>💻 Topic Based</h3>
+          <h3 style={{marginTop:0}}>💻 Topic Based</h3>
           <p>Choose a specific tech stack to practice.</p>
           <div className="input-row">
             <select value={topic} onChange={(e) => setTopic(e.target.value)}>
@@ -136,7 +153,7 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ margin: 0, color: "var(--primary-color)" }}>
             Question:
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal', marginLeft: '10px' }}>
+            <span style={{ fontSize: '0.9rem', color: '#888', fontWeight: 'normal', marginLeft: '10px' }}>
               ({questionSource === 'resume' ? 'From Resume' : 'From Topic'})
             </span>
           </h2>
@@ -145,13 +162,12 @@ function App() {
             className="btn-next-q"
             onClick={handleSmartNextQuestion}
             disabled={loading}
-            style={{ padding: "8px 16px", fontSize: "0.9rem" }}
           >
             {loading ? "Loading..." : "Next Question ⏭️"}
           </button>
         </div>
 
-        <p className="question-text">{question}</p>
+        <p className="question-text" style={{fontSize: '1.4rem', fontWeight: '500'}}>{question}</p>
       </div>
 
       {/* --- Answer Area --- */}
@@ -171,10 +187,11 @@ function App() {
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Type or speak your professional answer here..."
+          style={{width: '100%', padding: '15px', borderRadius: '8px', border: '1px solid #444', background: '#222', color: '#fff'}}
         />
 
         <div style={{ marginTop: '20px' }}>
-          <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+          <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{width: '100%'}}>
             {loading ? "Analyzing..." : "Submit Answer 🚀"}
           </button>
         </div>
@@ -182,7 +199,7 @@ function App() {
 
       {/* --- Feedback Section --- */}
       {feedback && (
-        <div className="card feedback-card" style={{ marginTop: '30px' }}>
+        <div className="card feedback-card" style={{ marginTop: '30px', borderLeft: '5px solid #64ffda' }}>
           <h2 style={{ color: "var(--primary-color)", marginBottom: '15px' }}>AI Feedback:</h2>
           <p style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>{feedback}</p>
         </div>
@@ -195,12 +212,12 @@ function App() {
         </button>
 
         {showHistory && (
-          <div className="history-container" style={{ marginTop: "20px" }}>
+          <div className="history-container" style={{ marginTop: "20px", background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '20px' }}>
             {history.map((item) => (
-              <div key={item.id} className="history-item" style={{ padding: "15px", borderBottom: "1px solid #333", marginBottom: "10px" }}>
+              <div key={item.id} className="history-item" style={{ paddingBottom: "15px", borderBottom: "1px solid #444", marginBottom: "15px" }}>
                 <p style={{ color: '#64ffda', fontWeight: 'bold' }}>Q: {item.question}</p>
-                <p style={{ color: '#8892b0', fontSize: '0.9rem' }}>You: {item.user_answer}</p>
-                <p style={{ color: '#ccd6f6', fontSize: '0.9rem', marginTop: "5px" }}>AI: {item.ai_feedback?.substring(0, 100)}...</p>
+                <p style={{ color: '#ccc', fontSize: '0.95rem' }}>You: {item.user_answer}</p>
+                <p style={{ color: '#aaa', fontSize: '0.9rem', marginTop: "5px", fontStyle: 'italic' }}>AI: {item.ai_feedback?.substring(0, 100)}...</p>
               </div>
             ))}
           </div>
