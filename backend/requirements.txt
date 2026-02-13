@@ -5,3 +5,4 @@ sqlalchemy
 psycopg2-binary
 pypdf2
 python-multipart
+python-dotenv
